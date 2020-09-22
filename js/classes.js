@@ -22,7 +22,7 @@ const States = {
 }
 
 let antHarvestTimer = 10;
-let harvesterTimeBetweenPheremone = 20;
+let harvesterTimeBetweenPheremone = 10;
 
 class Ant extends Object {
     constructor(x, y, size, speed, home, pstrength) {
@@ -79,8 +79,8 @@ class Ant extends Object {
         }
     }
 
-    dropPheremone() {
-        pheremones.push(new Pheromone(this.x, this.y, this.pstrength))
+    dropPheremone(pstrength) {
+        pheremones.push(new Pheromone(this.x, this.y, pstrength));
     }
 
 }
@@ -97,7 +97,7 @@ class Searcher extends Ant {
     update(poi) {
         switch (this.currentState) {
             case States.Harvesting:
-                this.dropPheremone();;
+                this.dropPheremone(this.pstrength);
                 this.currentState = States.Returning
                 break;
             case States.Returning:
@@ -142,11 +142,7 @@ class Harvester extends Ant {
                 if (f != null) {
                     f.Harvest();
                 }
-                this.counter++;
-                if(this.counter == harvesterTimeBetweenPheremone){
-                    this.counter = 0;
-                    this.dropPheremone();
-                }
+               
                 break;
             case States.Resting:
                 this.rest();
@@ -155,6 +151,10 @@ class Harvester extends Ant {
                 this.goHome();
                 if (this.home.size > Math.sqrt(util.getDistanceSquared({ x: this.x, y: this.y }, { x: this.home.x, y: this.home.y }))) {
                     this.currentState = States.Resting;
+                }
+                this.counter++;
+                if(this.counter % harvesterTimeBetweenPheremone == 0){
+                    this.dropPheremone(this.pstrength/this.counter);
                 }
                 break;
             case States.Harvesting:
@@ -229,13 +229,14 @@ class Pheromone extends Object {
     constructor(x, y, strength) {
         super(x, y);
         this.strength = strength;
+        this.totalStrength = strength;
     }
 
     draw() {
         ctx.save();
         ctx.beginPath();
-        ctx.globalAlpha = .2;
-        ctx.arc(this.x, this.y, this.strength, 0, Math.PI * 2)
+        ctx.globalAlpha = this.strength/this.totalStrength;
+        ctx.arc(this.x, this.y, 3, 0, Math.PI * 2)
         ctx.closePath();
         ctx.fillStyle = "blue";
         ctx.fill();
@@ -302,11 +303,11 @@ class AntHill extends Object {
     }
 
     SpawnHarvester(ants) {
-        ants.push(new Harvester(this.x, this.y, this.size + 2, this.speed, this, 1, this.smellFactor));
+        ants.push(new Harvester(this.x, this.y, this.size + 2, this.speed, this, 5, this.smellFactor));
     }
 
     SpawnSearcher(ants) {
-        ants.push(new Searcher(this.x, this.y, this.size, this.speed, this, 15, 1));
+        ants.push(new Searcher(this.x, this.y, this.size, this.speed, this, 50, 1));
     }
 }
 
