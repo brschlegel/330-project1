@@ -5,8 +5,25 @@ let ctx;
 let ants = [];
 let foods = [];
 let pheremones = [];
+let hills = [];
 let hill;
-let pheremoneDecay = .01;
+let pheremoneDecay = .1;
+let harvesterBiasRatio = .01; 
+let antHarvestTimer = 10;
+let foodDecay = .1;
+let hillDecay = .003;
+let harvesterCost = .2;
+let searcherCost = .5;
+let harvesterReturnFood = .2;
+let harvesterSize = 15;
+let searcherSize = 10;
+let harvesterSpeed = 4;
+let searcherSpeed = 4;
+let numHarvesterWave = 7;
+let numSearcherWave = 10;
+let harvesterDeathChance = .007;
+let searcherDeathChance = .001;
+let searcherSigma = .25;
 
 
 window.onload = init
@@ -16,10 +33,7 @@ function init() {
     canvas.height = canvasHeight;
 
     document.querySelector("#smellFactorSlider").onchange = function(){
-        for(let i =0; i < ants.length; i++){
-            ants[i].smellFactor = this.value;
-            console.log(this.value);
-        }
+        harvesterBiasRatio = this.value;
     }
 
     ctx.fillRect(0, 0, canvasWidth, canvasHeight);
@@ -32,15 +46,8 @@ function init() {
     foods.push(new Food(700,50,40))
     foods.push(new Food(400,200,20))
     let f3 = new Food(800,700, 40);
-    hill = new AntHill(600,600,10,.005);
-    for(let i = 0; i < 100; i++)
-    {
-        hill.SpawnSearcher(ants);
-    }
-    for(let i = 0; i < 20; i++)
-    {
-        hill.SpawnHarvester(ants);
-    }
+    hills.push( new AntHill(300,500,20,100));
+    initHills();
     foods.push(f);
     foods.push(f1);
     foods.push(f2);
@@ -55,11 +62,10 @@ function loop() {
     drawArray(foods, ctx);
     drawArray(ants, ctx);
     drawArray(pheremones, ctx);
-    hill.draw(ctx);
+    drawArray(hills, ctx);
     updateAnts();
     updatePheremones();
- 
-   
+    updateHills();
 }
 
 function drawArray(arr, ctx){
@@ -81,4 +87,18 @@ function updatePheremones(){
         pheremones[i].update();
     }
 }
+
+function updateHills(){
+    for(let i = 0; i < hills.length; i++){
+        hills[i].update();
+    }
+}
+
+function initHills(){
+    for(let i = 0; i < hills.length; i++){
+        hills[i].init();
+    }
+}
+
+
 

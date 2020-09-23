@@ -21,8 +21,7 @@ const States = {
     Returning: 4,
 }
 
-let antHarvestTimer = 10;
-let harvesterTimeBetweenPheremone = 10;
+
 
 class Ant extends Object {
     constructor(x, y, size, speed, home, pstrength) {
@@ -56,7 +55,7 @@ class Ant extends Object {
     }
 
     goHome() {
-        let biasVector = { x: this.smellFactor * 2 * (this.home.x - this.x), y: this.smellFactor * 2 * (this.home.y - this.y) };
+        let biasVector = { x: harvesterBiasRatio * 2 * (this.home.center.x - this.x), y: harvesterBiasRatio * 2 * (this.home.center.y - this.y) };
         let vector = util.getRandomUnitVector();
 
         let moveVector = { x: vector.x + biasVector.x, y: vector.y + biasVector.y }
@@ -80,34 +79,43 @@ class Ant extends Object {
     }
 
     dropPheremone(pstrength) {
-        pheremones.push(new Pheromone(this.x, this.y, pstrength));
+        pheremones.push(new Pheromone(this.x, this.y, this.pstrength));
     }
+
+ 
 
 }
 
 class Searcher extends Ant {
-    constructor(x, y, size, speed, home, pstrength, sigma) {
+    constructor(x, y, size, speed, home, pstrength) {
         super(x, y, size, speed, home, pstrength);
         this.previousTheta = Math.random() * 2 * Math.PI;
-        this.sigma = sigma
-        this.smellFactor = .4;
         this.color = "orange";
+
     }
 
     update(poi) {
         switch (this.currentState) {
             case States.Harvesting:
                 this.dropPheremone(this.pstrength);
-                this.currentState = States.Returning
+                this.currentState = States.Returning;
+                this.checkDeath();
                 break;
             case States.Returning:
                 this.goHome();
+                this.checkDeath();
+                if (this.home.size > Math.sqrt(util.getDistanceSquared({ x: this.x, y: this.y }, { x: this.home.center.x, y: this.home.y }))) {
+                    this.currentState = States.Resting;
+                    this.home.searcherReturning();
+                }
                 break;
             case States.Resting:
                 this.rest();
                 break;
             case States.Searching:
                 this.move();
+                this.checkDeath();
+                break;
 
         }
 
@@ -116,7 +124,7 @@ class Searcher extends Ant {
 
 
     move() {
-        let theta = util.generateNormalNoise(this.sigma, this.previousTheta);
+        let theta = util.generateNormalNoise(searcherSigma, this.previousTheta);
         let move = { x: this.speed * Math.cos(theta), y: this.speed * Math.sin(theta) };
         this.x += move.x;
         this.y += move.y;
@@ -124,14 +132,18 @@ class Searcher extends Ant {
         this.previousTheta = theta;
 
     }
+    checkDeath(){
+        if(Math.random() < searcherDeathChance){
+            ants.splice(ants.indexOf(this), 1);
+        }
+    }
 
 
 }
 
 class Harvester extends Ant {
-    constructor(x, y, size, speed, home, pstrength, smellFactor) {
+    constructor(x, y, size, speed, home, pstrength) {
         super(x, y, size, speed, home, pstrength);
-        this.smellFactor = smellFactor;
         this.color = "brown";
     }
     update(pointsOfInterest) {
@@ -142,6 +154,7 @@ class Harvester extends Ant {
                 if (f != null) {
                     f.Harvest();
                 }
+                this.checkDeath();
                
                 break;
             case States.Resting:
@@ -151,17 +164,16 @@ class Harvester extends Ant {
                 this.goHome();
                 if (this.home.size > Math.sqrt(util.getDistanceSquared({ x: this.x, y: this.y }, { x: this.home.x, y: this.home.y }))) {
                     this.currentState = States.Resting;
+                    this.home.harvesterReturning();
                 }
-                this.counter++;
-                if(this.counter % harvesterTimeBetweenPheremone == 0){
-                    this.dropPheremone(this.pstrength/this.counter);
-                }
+                this.checkDeath();
                 break;
             case States.Harvesting:
                 this.counter++;
                 if (this.counter > antHarvestTimer) {
                     this.counter = 0;
                     this.currentState = States.Returning;
+                    this.dropPheremone();
                 }
                 break;
         }
@@ -192,7 +204,7 @@ class Harvester extends Ant {
                     break;
                 }
             }
-             biasVector = { x: this.smellFactor * (pointsOfInterest[index].x - this.x), y: this.smellFactor * (pointsOfInterest[index].y - this.y) };
+             biasVector = { x: harvesterBiasRatio * (pointsOfInterest[index].x - this.x), y: harvesterBiasRatio * (pointsOfInterest[index].y - this.y) };
         }
         else{
              biasVector = {x:0,y:0};
@@ -223,6 +235,12 @@ class Harvester extends Ant {
         }
     }
 
+    checkDeath(){
+        if(Math.random() < harvesterDeathChance){
+            ants.splice(ants.indexOf(this), 1);
+        }
+    }
+
 }
 
 class Pheromone extends Object {
@@ -245,8 +263,10 @@ class Pheromone extends Object {
 
     update() {
         this.strength -= pheremoneDecay;
+       
         if(this.strength < .1){
             pheremones.splice(pheremones.indexOf(this), 1);
+            
         }
     }
 }
@@ -273,10 +293,10 @@ class Food extends Object {
         setTimeout(this.Harvest, 100);
         this.counter++;
         if (this.counter == antHarvestTimer) {
-            clearTimeout(Harvest);
+            clearTimeout(this.Harvest);
             this.counter = 0;
         }
-        this.size -= .1;
+        this.size -= foodDecay;
         if (this.size < 5) {
             foods.splice(foods.indexOf(this), 1);
             console.log("deleted");
@@ -287,27 +307,58 @@ class Food extends Object {
 }
 
 class AntHill extends Object {
-    constructor(x, y, size, smellFactor) {
+    constructor(x, y, size) {
         super(x, y);
         this.size = size;
         this.speed = 4;
-        this.smellFactor = smellFactor;
+        this.center = {x: this.x - (this.size / 2), y: this.y - (this.size /2)}
     }
 
     draw(ctx) {
         ctx.save();
         ctx.fillStyle = "red";
-        ctx.fillRect(this.x, this.y, 30, 30);
+        ctx.fillRect(this.center.x, this.center.y,this.size, this.size);
         ctx.restore();
 
     }
 
-    SpawnHarvester(ants) {
-        ants.push(new Harvester(this.x, this.y, this.size + 2, this.speed, this, 5, this.smellFactor));
+    spawnHarvester() {
+        for(let i =0; i < numHarvesterWave; i++){
+            ants.push(new Harvester(this.center.x, this.center.y, harvesterSize, harvesterSpeed, this, 5));
+        }
+       
     }
 
-    SpawnSearcher(ants) {
-        ants.push(new Searcher(this.x, this.y, this.size, this.speed, this, 50, 1));
+    spawnSearcher() {
+        for(let i =0; i < numSearcherWave; i++){
+            ants.push(new Searcher(this.center.x, this.center.y, searcherSize, searcherSpeed, this, 50));
+        }
+        console.log("called bti");
+        
+    }
+
+    harvesterReturning(){
+        this.spawnHarvester();
+        this.size += harvesterReturnFood;
+    }
+
+    //If a searcher returns this means they found some food
+    searcherReturning(){
+        this.spawnHarvester();
+    }
+
+    init(){
+        setTimeout(this.init.bind(this),10000);
+        this.spawnSearcher();
+    }
+
+    update(){
+        this.size -= hillDecay * Math.sqrt(this.size);
+        this.center = {x: this.x - (this.size / 2), y: this.y - (this.size /2)}
+        if(this.size < 1){
+            hills.splice(hills.indexOf(this), 1);
+            delete(this);
+        }
     }
 }
 

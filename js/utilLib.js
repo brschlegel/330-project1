@@ -25,6 +25,7 @@
         getDistanceSquared(position1, position2) {
             return (position1.x - position2.x) * (position1.x - position2.x) + (position1.y - position2.y) * (position1.y - position2.y);
         },
+        //Box-Mueller transform
          generateNormalNoise(sigma, mu){
             let num1 = Math.random();
             let num2 = Math.random();
