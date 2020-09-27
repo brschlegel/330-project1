@@ -24,14 +24,13 @@ const States = {
 
 
 class Ant extends Object {
-    constructor(x, y, size, speed, home, pstrength) {
+    constructor(x, y, size, speed, home) {
         super(x, y);
         this.size = size;
         this.speed = speed;
         this.home = home;
         this.currentState = States.Searching;
         this.counter = 0;
-        this.pstrength = pstrength;
     }
 
 
@@ -87,8 +86,8 @@ class Ant extends Object {
 }
 
 class Searcher extends Ant {
-    constructor(x, y, size, speed, home, pstrength) {
-        super(x, y, size, speed, home, pstrength);
+    constructor(x, y, size, speed, home) {
+        super(x, y, size, speed, home);
         this.previousTheta = Math.random() * 2 * Math.PI;
         this.color = "orange";
 
@@ -104,7 +103,7 @@ class Searcher extends Ant {
             case States.Returning:
                 this.goHome();
                 this.checkDeath();
-                if (this.home.size > Math.sqrt(util.getDistanceSquared({ x: this.x, y: this.y }, { x: this.home.center.x, y: this.home.y }))) {
+                if (this.home.size/2 > Math.sqrt(util.getDistanceSquared({ x: this.x, y: this.y }, { x: this.home.center.x, y: this.home.center.y }))) {
                     this.currentState = States.Resting;
                     this.home.searcherReturning();
                 }
@@ -125,7 +124,7 @@ class Searcher extends Ant {
 
     move() {
         let theta = util.generateNormalNoise(searcherSigma, this.previousTheta);
-        let move = { x: this.speed * Math.cos(theta), y: this.speed * Math.sin(theta) };
+        let move = { x: searcherSpeed * Math.cos(theta), y: searcherSpeed * Math.sin(theta) };
         this.x += move.x;
         this.y += move.y;
         this.checkFood();
@@ -138,12 +137,15 @@ class Searcher extends Ant {
         }
     }
 
+    dropPheremone(){
+        pheremones.push(new Pheromone(this.x, this.y, searcherPStrength));
+    }
 
 }
 
 class Harvester extends Ant {
-    constructor(x, y, size, speed, home, pstrength) {
-        super(x, y, size, speed, home, pstrength);
+    constructor(x, y, size, speed, home) {
+        super(x, y, size, speed, home);
         this.color = "brown";
     }
     update(pointsOfInterest) {
@@ -213,7 +215,7 @@ class Harvester extends Ant {
 
         let moveVector = { x: vector.x + biasVector.x, y: vector.y + biasVector.y }
         let mvMag = Math.sqrt(moveVector.x * moveVector.x + moveVector.y * moveVector.y)
-        moveVector = { x: this.speed * (moveVector.x / mvMag), y: this.speed * (moveVector.y / mvMag) }
+        moveVector = { x: harvesterSpeed * (moveVector.x / mvMag), y: harvesterSpeed * (moveVector.y / mvMag) }
 
         this.x += moveVector.x;
         this.y += moveVector.y;
@@ -239,6 +241,11 @@ class Harvester extends Ant {
         if(Math.random() < harvesterDeathChance){
             ants.splice(ants.indexOf(this), 1);
         }
+    }
+
+    
+    dropPheremone(){
+        pheremones.push(new Pheromone(this.x, this.y, harvesterPStrength));
     }
 
 }
@@ -310,7 +317,6 @@ class AntHill extends Object {
     constructor(x, y, size) {
         super(x, y);
         this.size = size;
-        this.speed = 4;
         this.center = {x: this.x - (this.size / 2), y: this.y - (this.size /2)}
     }
 
@@ -324,16 +330,15 @@ class AntHill extends Object {
 
     spawnHarvester() {
         for(let i =0; i < numHarvesterWave; i++){
-            ants.push(new Harvester(this.center.x, this.center.y, harvesterSize, harvesterSpeed, this, 5));
+            ants.push(new Harvester(this.center.x, this.center.y, harvesterSize, harvesterSpeed, this));
         }
        
     }
 
     spawnSearcher() {
         for(let i =0; i < numSearcherWave; i++){
-            ants.push(new Searcher(this.center.x, this.center.y, searcherSize, searcherSpeed, this, 50));
+            ants.push(new Searcher(this.center.x, this.center.y, searcherSize, searcherSpeed, this));
         }
-        console.log("called bti");
         
     }
 

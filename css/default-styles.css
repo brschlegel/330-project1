@@ -1,1 +1,22 @@
+canvas {
+    border: 15px solid gold;
+}
 
+#controls{
+    float: right;
+    display:grid;
+    grid-template-columns: repeat(3,33%);
+}
+
+#HarvesterWalking{
+    grid-column-start: 1;
+    
+}
+
+#SearcherWalking{
+    grid-column-start: 2;
+}
+
+#PheremoneRules{
+    grid-column-start: 3;
+}

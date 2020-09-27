@@ -5,25 +5,47 @@
     <meta charset="utf-8" />
     <title>Sine Start</title>
     <style>
-        canvas {
-            border: 1px solid black;
-        }
-	</style>
-	<script src = "js\utilLib.js"></script>
-	<script src = "js\classes.js"></script>
-	<script src = "js\index.js"></script>
+      
+    </style>
+    <link rel="stylesheet" href="css/default-styles.css">
+    <script src="js\utilLib.js"></script>
+    <script src="js\classes.js"></script>
+    <script src="js\index.js"></script>
 
-    <script>
-        console.log(util.getRandomColor());
 
-        // helpers
-       
-    </script>
 </head>
 
 <body>
-    <canvas id="canvas"></canvas>
-    <input type="range" min="0" max=".1" value=".015" class="slider" step =".0005" id="smellFactorSlider">
+    <div id = "container">
+     <canvas id="canvas"></canvas>
+    <div id="controls">
+        <div id="HarvesterWalking">
+            <p>Bias Vector Mulitplier</p>
+            <input type="range" min="0" max=".1" value=".015" class="slider" step=".0005" id="smellFactorSlider">
+            <p>Harvester Speed</p>
+            <input type="range" min="0" max="7" value="4" class="slider" step=".5" id="HarvesterSpeedSlider">
+
+        </div>
+
+        <div id="SearcherWalking">
+            <p>Searcher Standard Deviation</p>
+            <input type="range" min=".05" max="1.5" value=".25" class="slider" step=".05" id="SearcherSigmaSlider">
+            <p>Searcher Speed</p>
+            <input type="range" min="0" max="7" value="4" class="slider" step=".5" id="SearcherSpeedSlider">
+
+        </div>
+        <div id="PheremoneRules">
+            <p>Harvester Pheremone Strength</p>
+            <input type="range" min="1" max="50" value="5" class="slider" step="5" id="HarvesterPStrengthSlider">
+            <p>Searcher Pheremone Strength</p>
+            <input type="range" min="1" max="100" value="50" class="slider" step="5" id="SearcherPStrengthSlider">
+        </div>
+        <div id = "AntSpawningRules">
+            <p>Harvester Wave Number</p>
+            <input type = "number" min = "1" max = "20" value = "4" class = "counter" id = "HarvesterWaveNumCounter">
+        </div>
+    </div>
+</div>
 </body>
 
 </html>

@@ -6,7 +6,6 @@ let ants = [];
 let foods = [];
 let pheremones = [];
 let hills = [];
-let hill;
 let pheremoneDecay = .1;
 let harvesterBiasRatio = .01; 
 let antHarvestTimer = 10;
@@ -15,8 +14,8 @@ let hillDecay = .003;
 let harvesterCost = .2;
 let searcherCost = .5;
 let harvesterReturnFood = .2;
-let harvesterSize = 15;
-let searcherSize = 10;
+const harvesterSize = 15;
+const searcherSize = 10;
 let harvesterSpeed = 4;
 let searcherSpeed = 4;
 let numHarvesterWave = 7;
@@ -24,6 +23,8 @@ let numSearcherWave = 10;
 let harvesterDeathChance = .007;
 let searcherDeathChance = .001;
 let searcherSigma = .25;
+let harvesterPStrength = 5;
+let searcherPStrength = 50;
 
 
 window.onload = init
@@ -31,10 +32,32 @@ function init() {
     ctx = canvas.getContext("2d");
     canvas.width = canvasWidth;
     canvas.height = canvasHeight;
-
+    //#region eventSubscription
     document.querySelector("#smellFactorSlider").onchange = function(){
         harvesterBiasRatio = this.value;
     }
+
+    document.querySelector("#HarvesterSpeedSlider").onchange = function(){
+        harvesterSpeed  = this.value;
+    }
+
+    document.querySelector("#SearcherSigmaSlider").onchange = function(){
+        searcherSigma = this.value;
+    }
+
+    document.querySelector("#SearcherSpeedSlider").onchange = function(){
+        searcherSpeed = this.value;
+    }
+
+    document.querySelector("#HarvesterPStrengthSlider").onchange = function(){
+        harvesterPStrength = this.value;
+    }
+
+    document.querySelector("#SearcherPStrengthSlider").onchange = function(){
+        searcherPStrength = this.value;
+    }
+
+    //#endregion
 
     ctx.fillRect(0, 0, canvasWidth, canvasHeight);
   
