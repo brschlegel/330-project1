@@ -39,13 +39,46 @@
             <input type="range" min="1" max="50" value="5" class="slider" step="5" id="HarvesterPStrengthSlider">
             <p>Searcher Pheremone Strength</p>
             <input type="range" min="1" max="100" value="50" class="slider" step="5" id="SearcherPStrengthSlider">
+            <p>PheremoneDecay</p>
+            <input type="range" min=".05" max=".5" value=".1" class="slider" step=".05" id="PheremoneDecay">
         </div>
         <div id = "AntSpawningRules">
             <p>Harvester Wave Number</p>
             <input type = "number" min = "1" max = "20" value = "4" class = "counter" id = "HarvesterWaveNumCounter">
+            <p>Searcher Wave Number</p>
+            <input type = "number" min = "1" max = "20" value = "4" class = "counter" id ="SearcherWaveNumCounter">
+        </div>
+        <div id = "FoodCosts">
+            <p>Harvester Cost </p>
+            <input type = "range" min = ".05" max = "1" value = ".2" class = "counter" step = ".05" id = "HarvesterCost">
+            <p>Searcher Cost</p>
+            <input type = "range" min = ".1" max = "2" value = ".5" class = "counter" step = ".1"id = "SearcherCost">
+            <p>Hill Maintenance Cost</p>
+            <input type = "range" min = ".001" max = ".01" value = ".003" class = "counter" step = ".001" id = "HillDecay">
+        </div>
+        <div id = "DeathRules">
+            <p>Harvester Death Chance</p>
+            <input type = "range" min = ".001" max = ".01" value = ".007" class = "counter" step = ".001" id = "HarvesterDeathChance">
+            <p>Searcher Death Chance</p>
+            <input type = "range" min = ".001" max = ".005" value = ".001" class = "counter" step = ".0005" id = "SearcherDeathChance">
+        </div>
+        <div>
+            <p>Click Mode</p>
+            <select name="click" id="click">
+                <option value="Food">Food</option>
+                <option value="Pheremone">Pheremone</option>
+              </select>
         </div>
     </div>
 </div>
+<h2>The Ant simulation has 5 rules!</h2>
+<ol>
+    <li>Harvesters are orange. They are random walkers with a bias towards blue pheremones. Searchers are yellow, and are smooth random walkers made with Gaussian Noise</li>
+    <li>When Searchers find food they drop a strong pheremone. When Harvesters find food they drop a weak pheremone</li>
+    <li>Running the hill takes food. Producing ants also takes food. They only way to gain food is for harvesters to bring them back</li>
+    <li>Any ant has a chance to die when not resting in the hive</li>
+    <li>Searchers spawn every 10 seconds. Harvesters spawn anytime an ant comes back to the hill</li>
+</ol>
 </body>
 
 </html>

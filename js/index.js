@@ -25,6 +25,7 @@ let searcherDeathChance = .001;
 let searcherSigma = .25;
 let harvesterPStrength = 5;
 let searcherPStrength = 50;
+let clickMode = "Food";
 
 
 window.onload = init
@@ -57,6 +58,41 @@ function init() {
         searcherPStrength = this.value;
     }
 
+    document.querySelector("#HarvesterWaveNumCounter").onchange = function(){
+        numHarvesterWave = this.value;
+    }
+
+    document.querySelector("#SearcherWaveNumCounter").onchange = function(){
+        numHarvesterWave = this.value;
+    }
+    document.querySelector("#HillDecay").onchange = function(){
+        hillDecay = this.value;
+    }
+
+    document.querySelector("#SearcherCost").onchange = function(){
+        searcherCost = this.value;
+    }
+
+    document.querySelector("#HarvesterCost").onchange = function(){
+        harvesterCost = this.value;
+    }
+
+    document.querySelector("#PheremoneDecay").onchange = function(){
+        pheremoneDecay = this.value;
+    }
+
+    document.querySelector("#HarvesterDeathChance").onchange = function(){
+        harvesterDeathChance = this.value;
+    }
+
+    document.querySelector("#SearcherDeathChance").onchange = function(){
+        searcherDeathChance = this.value;
+    }
+
+    document.querySelector("#click").onchange = function(){
+        clickMode = this.value;
+    }
+
     //#endregion
 
     ctx.fillRect(0, 0, canvasWidth, canvasHeight);
@@ -75,7 +111,7 @@ function init() {
     foods.push(f1);
     foods.push(f2);
     foods.push(f3);
-    
+    canvas.onclick = canvasClicked;
     loop();
 }
 
@@ -120,6 +156,22 @@ function updateHills(){
 function initHills(){
     for(let i = 0; i < hills.length; i++){
         hills[i].init();
+    }
+}
+
+function canvasClicked(e){
+    let rect = e.target.getBoundingClientRect();
+    let mouseX = e.clientX - rect.x;
+    let mouseY = e.clientY - rect.y;
+
+    switch(clickMode){
+        case "Food":
+            foods.push(new Food(mouseX,mouseY,50));
+            break;
+        case "Hill":
+            hills.push(new AntHill(mouseX,mouseY,100));
+        case "Pheremone":
+            pheremones.push(new Pheromone(mouseX,mouseY, searcherPStrength));
     }
 }
 
